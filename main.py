@@ -1,0 +1,86 @@
+import math
+from collections import deque
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from asteval import Interpreter
+from typing import List
+from datetime import datetime
+from calculator import expand_percent
+from models import CalculatorLog, Expression
+
+app = FastAPI(title="Mini calculator API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+aeval = Interpreter(minimal=True, usersyms={"pi": math.pi, "e": math.e})
+
+HISTORY_MAX = 1000
+history = deque(maxlen=HISTORY_MAX)
+
+def add_to_history(expr: str, result, ok: bool, error: str = ""):
+    history_item = {
+        "expr": expr,
+        "result": result,
+        "ok": ok,
+        "error": error
+    }
+    history.append(history_item) 
+
+@app.post("/calculator", response_model=CalculatorLog)
+def calculate(expr: Expression):
+    try:
+        clean_expr = expr.expr.replace("×", "*").replace("÷", "/").replace("−", "-")
+        code = expand_percent(clean_expr)
+        result = aeval(code)
+
+        if aeval.error:
+            msg = ";".join(str(e.get_error()) for e in aeval.error)
+            aeval.error.clear()
+            log = CalculatorLog(
+                timestamp=datetime.now(),
+                expr=expr.expr,
+                result=None,
+                ok=False,
+                error=msg
+            )
+        else:
+            log = CalculatorLog(
+                timestamp=datetime.now(),
+                expr=expr.expr,
+                result=result,
+                ok=True,
+                error=""
+            )
+
+        history.append(log)   # ✅ store object, not dict
+        return log
+
+    except Exception as e:
+        log = CalculatorLog(
+            timestamp=datetime.now(),
+            expr=expr.expr,
+            result=None,
+            ok=False,
+            error=str(e)
+        )
+        history.append(log)   # ✅ store object, not dict
+        return log
+
+
+@app.get("/history", response_model=List[CalculatorLog])
+def get_history(limit: int = 50):
+    actual_limit = min(limit, len(history))  # ✅ cleaner
+    return list(history)[-actual_limit:]     # ✅ already CalculatorLog objects
+
+
+@app.delete("/history")
+def clear_history():
+    history.clear()
+    return {"ok": True}
