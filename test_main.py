@@ -5,6 +5,7 @@ client = TestClient(app)
 
 def test_basic_division():
     r = client.post("/calculator", json={"expr": "30/4"})
+    r = client.post("/calculator", params={"expr": "30/4"})
     assert r.status_code == 200
     data = r.json()
     assert data["ok"] is True
@@ -12,6 +13,7 @@ def test_basic_division():
 
 def test_percent_subtraction():
     r = client.post("/calculator", json={"expr": "100 - 6%"})
+    r = client.post("/calculator", params={"expr": "100 - 6%"})
     assert r.status_code == 200
     data = r.json()
     assert data["ok"] is True
@@ -19,6 +21,7 @@ def test_percent_subtraction():
 
 def test_standalone_percent():
     r = client.post("/calculator", json={"expr": "6%"})
+    r = client.post("/calculator", params={"expr": "6%"})
     assert r.status_code == 200
     data = r.json()
     assert data["ok"] is True
@@ -26,6 +29,7 @@ def test_standalone_percent():
 
 def test_invalid_expr_returns_error():
     r = client.post("/calculator", json={"expr": "2**(3"})
+    r = client.post("/calculator", params={"expr": "2**(3"})
     assert r.status_code == 200
     data = r.json()
     assert data["ok"] is False
@@ -40,6 +44,7 @@ def test_calculator_history():
     expressions = ["10 + 5", "20 - 4", "3 * 7"]
     for expr in expressions:
         r = client.post("/calculator", json={"expr": expr})
+        r = client.post("/calculator", params={"expr": expr})
         assert r.status_code == 200
         data = r.json()
         assert data["ok"] is True
@@ -85,3 +90,4 @@ def test_expression_model_validation():
     # Missing expr field should return 422 (validation error)
     r = client.post("/calculator", json={})
     assert r.status_code == 422
+        assert record["ok"] is True
