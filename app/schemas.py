@@ -1,16 +1,16 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
-from calculator import expand_percent
+from app.dependencies import expand_percent
 
-class Expression(BaseModel):
+class ExpressionIn(BaseModel):
     expr: str
 
     def expand_percent(self) -> str:
         """Expand percent expressions into valid math code."""
         return expand_percent(self.expr)
 
-class CalculatorLog(BaseModel):
+class ExpressionOut(ExpressionIn):
     """Model for returning calculation results and logging history."""
     timestamp: datetime
     expr: str

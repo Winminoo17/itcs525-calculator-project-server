@@ -1,4 +1,6 @@
 import re
+from collections import deque 
+from fastapi import Header, HTTPException
 
 _percent_pair = re.compile(r"""
     (?P<a>\d+(?:\.\d+)?)
@@ -25,3 +27,6 @@ def expand_percent (expr : str ) -> str:
 
     s = _number_percent.sub(lambda m : f"({ m.group('n')}/100)",s)
     return s
+
+HISTORY_MAX = 1000
+history = deque(maxlen=HISTORY_MAX)
