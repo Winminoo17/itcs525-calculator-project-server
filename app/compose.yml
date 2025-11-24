@@ -1,0 +1,18 @@
+services:
+  backend:
+    build: .
+    ports:
+      - 34242:5000
+    volumes:
+      - ./:/app
+  database:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: appdb
+    ports:
+      - "54242:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+volumes:
+  dbdata:

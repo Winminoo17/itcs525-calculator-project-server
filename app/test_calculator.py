@@ -2,7 +2,6 @@ import pytest
 from app.dependencies import expand_percent
 from app.schemas import ExpressionIn
 
-
 def test_add_percent():
     """Test addition where B% means 'B percent of A'."""
     e = ExpressionIn(expr="5 + 10%")

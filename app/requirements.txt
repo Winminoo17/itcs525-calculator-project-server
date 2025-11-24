@@ -1,0 +1,8 @@
+fastapi
+fastapi[standard]
+pytest
+asteval
+pydantic
+sqlalchemy
+sqlmodel
+mysql-connector-python
